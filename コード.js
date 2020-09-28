@@ -5,12 +5,6 @@ function myFunction() {
         'Graspy_KPIログ(月)': [1,3]
     };
 
-    const alpPositionList = {
-        // row, column 
-        'Graspy_全体定例用(週)': 'A2',
-        'Graspy_KPIログ(月)': 'C1'
-    };
-    
     const sheet = SpreadsheetApp.getActiveSheet();
     const sheetName = sheet.getName();
     const activeCell = sheet.getActiveCell();
@@ -20,6 +14,7 @@ function myFunction() {
         return false;
     }
 
+
     // セレクトボックス用のセルかどうか
     if (!isSelectCell(activeCell, positionList[sheetName])) {
         return false;
@@ -27,16 +22,26 @@ function myFunction() {
 
     // 選択したい日付を取得
     const targetDate = activeCell.getValue();
-    console.log(targetDate);
 
     // 日付一覧から一致するセル情報を取得
-    const targetColumnIndex = findColumnIndex(sheet, targetDate, positionList[sheetName][0]);
+    const targetColumnIndex = findColumnIndex(sheet, targetDate, positionList[sheetName]);
+    console.log(targetColumnIndex);
+    const targetColumnNum = targetColumnIndex + positionList[sheetName][1] + 1;
     const targetRowIndex = positionList[sheetName][0];
-    const targetCell = sheet.getRange(targetRowIndex, targetColumnIndex).getValue();
+    const targetCell = sheet.getRange(targetRowIndex, targetColumnNum);
+    const targetNotation = targetCell.getA1Notation();
+    const targetAlp = pickAlp(targetNotation);
+    const start = targetAlp+String(1);
+    const end = targetAlp+String(30);
+    const targetColumn = sheet.getRange(start+':'+end);
 
     // 対象をアクティブ化
-    targetCell.activete();
+    targetColumn.activate();
+}
 
+function pickAlp(notation) {
+    const n = notation;
+    return n.replace(/\d/, '');
 }
 
 function isSelectCell(activeCell, selectPosition) {
@@ -50,20 +55,23 @@ function isSelectCell(activeCell, selectPosition) {
 
 }
 
-function findColumnIndex(sheet, val, row) {
+function findColumnIndex(sheet, val, position) {
     const lastColumn = sheet.getLastColumn();
-    const targetRowValues = sheet.getRange(row, lastColumn).getValues();
+    const targetRowValues = sheet.getRange(position[0], position[1]+1, 1, lastColumn).getValues();
+    let index;
 
-    targetRowValues.forEach(v, index => {
-        if (v[0] == val) {
-            return index
+    for (let i = 0; i < targetRowValues[0].length; i++) {
+        if (String(targetRowValues[0][i]) == String(val)) {
+            index = i; // forのindex指定してる分と、そもそも配列としてindex取ってる文と
         }
-    });
+    }
+
+    return index;
 }
 
 function existsSheetName(positionList, sheetName) {
     const keys = Object.keys(positionList);
-    if (keys.indexOf(sheetName)) {
+    if (keys.indexOf(sheetName) != -1) {
         return true;
     }
 
