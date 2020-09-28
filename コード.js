@@ -25,7 +25,6 @@ function myFunction() {
 
     // 日付一覧から一致するセル情報を取得
     const targetColumnIndex = findColumnIndex(sheet, targetDate, positionList[sheetName]);
-    console.log(targetColumnIndex);
     const targetColumnNum = targetColumnIndex + positionList[sheetName][1] + 1;
     const targetRowIndex = positionList[sheetName][0];
     const targetCell = sheet.getRange(targetRowIndex, targetColumnNum);
